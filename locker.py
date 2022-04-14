@@ -11,7 +11,7 @@ parser.add_argument(
     'home',
     metavar='HOME',
     type=Path,
-    help='the home directory whose dependencies should be locked. All dependencies from the .m2 and .gitlibs foldersare taken into account')
+    help='the home directory whose dependencies should be locked. All dependencies from the .m2 and .gitlibs folders are taken into account')
 args = parser.parse_args()
 
 result = {'maven': {}, 'git': {}}
