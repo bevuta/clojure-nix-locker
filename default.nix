@@ -40,15 +40,19 @@ in {
           mkdir "$tmp"/{root,home}
           cd "$tmp/root"
 
-          ${lib.optionalString (gitRepo != null) ''
-            # Copies all git-tracked files (including uncommitted changes and submodules)
-            # Why not `git archive $(git stash create)`? Because that doesn't include submodules
-            # Why not `git worktree create`? Because that doesn't include uncommitted changes
-            # Why --ignore-failed-read? Because `git ls-files` includes deleted files
-            git -C ${es (toString gitRepo)} ls-files -z \
-              | tar -C ${es (toString gitRepo)} --ignore-failed-read -cz --null -T - \
-              | tar -xzf -
-          ''}
+          ${lib.optionalString (gitRepo != null)
+            (if builtins.pathExists (gitRepo + "/.git") then ''
+              # Copies all git-tracked files (including uncommitted changes and submodules)
+              # Why not `git archive $(git stash create)`? Because that doesn't include submodules
+              # Why not `git worktree create`? Because that doesn't include uncommitted changes
+              # Why --ignore-failed-read? Because `git ls-files` includes deleted files
+              git -C ${es (toString gitRepo)} ls-files -z \
+                | tar -C ${es (toString gitRepo)} --ignore-failed-read -cz --null -T - \
+                | tar -xzf -
+            '' else ''
+              cp -rT ${es (toString gitRepo)} .
+            '')
+          }
 
           # Ensures that clojure creates all the caches in our empty separate home directory
           export JAVA_TOOL_OPTIONS="-Duser.home=$tmp/home"
