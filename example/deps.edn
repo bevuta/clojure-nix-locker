@@ -1,0 +1,8 @@
+; adapted from https://clojure.org/guides/tools_build#_setup
+{:paths ["src"] ;; project paths
+ :deps {org.clojure/data.csv {:mvn/version "1.0.0"}} ;; project deps
+
+ :aliases
+ {;; Run with clj -T:build function-in-build
+  :build {:extra-deps {io.github.clojure/tools.build {:git/sha "1309f935b098123eb807c972a053eeab77f6f4cd"}}
+          :ns-default build}}}
