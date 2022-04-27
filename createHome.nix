@@ -42,10 +42,12 @@ let
 
     # Note that we aren't using `linkFarm` for this because that would
     # give collisions for multiple entries at the same path
-    (lib.concatMapStringsSep "\n" (item: ''
+    ((lib.concatMapStringsSep "\n" (item: ''
       mkdir -p "$out"/${lib.escapeShellArg item.common_dir}
       touch "$out"/${lib.escapeShellArg item.common_dir}/config
-    '') (lib.attrValues contents.git));
+    '') (lib.attrValues contents.git)) +
+    # just so we don't fail in the 0-gitlibs case
+    "mkdir -p $out");
 
   # Creates the final home directory, combining all parts together
   result = pkgs.linkFarm "clojure-home" [
