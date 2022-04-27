@@ -25,7 +25,7 @@ Both of these are designed to be used roughly like this:
 - At build-time, invoke clojure and pass it the precomputed classpath.
 
 By contrast, `clojure-nix-locker` is designed around letting classpath computation happen later, at build-time.
-It works roughly like thi:
+It works roughly like this:
 
 - At lock-time, call arbitrary user-provided commands (like `clojure -P`) to pre-populate the caches in `.m2` and `.gitlibs`, then crawl those to generate the lockfile.
 - At nix-eval-time, use the information from the lockfile to recreate these caches in a way that's "close enough" to the real thing.
