@@ -49,6 +49,13 @@ let
     # just so we don't fail in the 0-gitlibs case
     "mkdir -p $out");
 
+  # Provides a ~/.clojure directory which clojure will accept read-only
+  configDir = pkgs.runCommandNoCC "config-dir" {} ''
+    mkdir -p $out/tools
+    echo '{}' > $out/deps.edn
+    echo '{}' > $out/tools/tools.edn
+  '';
+
   # Creates the final home directory, combining all parts together
   result = pkgs.linkFarm "clojure-home" [
     {
@@ -62,6 +69,10 @@ let
     {
       name = ".gitlibs/_repos";
       path = gitFakeRepoCache;
+    }
+    {
+      name = ".clojure";
+      path = configDir;
     }
   ];
 
