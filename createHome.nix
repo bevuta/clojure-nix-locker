@@ -2,15 +2,15 @@
 # (for maven dependencies) and ~/.gitlibs (for git dependencies) according
 # to a lockfile generated with ./locker.py
 
-{ pkgs, mavenRepos, lockfile }:
+{ pkgs, src, mavenRepos, lockfile }:
 let
   lib = pkgs.lib;
   # Fall back to no dependencies if the lockfile hasn't been generated yet
   # Useful when your nix-shell evaluates this code, but the nix-shell also
   # provides the binary to produce the lockfile
   contents =
-    if builtins.pathExists lockfile
-    then lib.importJSON lockfile
+    if builtins.pathExists (src + "/${lockfile}")
+    then lib.importJSON (src + "/${lockfile}")
     else { maven = {}; git = {}; };
 
   fetchMaven = file: sha256: {
