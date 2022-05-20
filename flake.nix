@@ -22,13 +22,15 @@
             "https://repo1.maven.org/maven2/"
             "https://repo.clojars.org/"
           ]
-        , # thecommand to produce the dependencies
+        , # the command to produce the dependencies
           command
-        }: {
-          locker = ((import ./default.nix { inherit pkgs; }).lockfile { inherit src lockfile mavenRepos; }).commandLocker command;
-          homeDirectory = ((import ./default.nix { inherit pkgs; }).lockfile { inherit src lockfile mavenRepos; }).homeDirectory;
-          shellEnv = ((import ./default.nix { inherit pkgs; }).lockfile { inherit src lockfile mavenRepos; }).shellEnv;
-        };
+        }:
+          let lockfile = ((import ./default.nix { inherit pkgs; }).lockfile { inherit src lockfile mavenRepos; });
+          in {
+            locker = lockfile.commandLocker command;
+            homeDirectory = lockfile.homeDirectory;
+            shellEnv = lockfile.shellEnv;
+          };
       };
 
     overlays.default = final: prev: {

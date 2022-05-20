@@ -13,9 +13,6 @@
         pkgs = nixpkgs.legacyPackages.${system};
         my-clojure-nix-locker = clojure-nix-locker.lib.customLocker {
           inherit pkgs;
-          # XXX: For some reason this command doesn't work. There is some
-          #      clojure maven download that happens later in the build process.
-          # command = "${pkgs.clojure}/bin/clojure A:build -P";
           command = "${pkgs.clojure}/bin/clojure -T:build uber";
           lockfile = "./deps.lock.json";
           src = ./.;
@@ -33,20 +30,8 @@
             git
           ];
 
-          # XXX: I would like to replace the beginning of this with ${my-clojure-nix-locker.shellEnv}, but that produces a non-writeable home directory. what should we do here?
-          #      - make shellEnv work like this
-          #      - does this actually need HOME to be writeable?
-          #      - make a separate writeableShellEnv
-          #      - leave it as is with this just not using shellEnv
           buildPhase = ''
-            # Make the home directory writable, needed for babashka and clojure dependencies
-            export HOME=$(mktemp -d)
-
-            # java would use `/etc/passwd` to get the home directory, override it manually
-            export JAVA_TOOL_OPTIONS="-Duser.home=$HOME"
-
-            # Inject maven and git dependencies
-            ln -sv ${my-clojure-nix-locker.homeDirectory}/.{m2,gitlibs} "$HOME"
+            source ${my-clojure-nix-locker.shellEnv}
 
             # Now compile as in https://clojure.org/guides/tools_build#_compiled_uberjar_application_build
             clojure -T:build uber
