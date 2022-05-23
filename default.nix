@@ -15,7 +15,7 @@ in {
     { # The git repository of this lockfile's project. If specified, a clean
       # version of this repository (including uncommitted changes but without
       # untracked files) will be available for lockfile generation
-      gitRepo ? null
+      src ? null
     , # The path to the lockfile, e.g. `./deps.lock.json`
       lockfile
     , # Specify the maven repositories to use, overriding the defaults
@@ -38,32 +38,37 @@ in {
           tmp=$(mktemp -d)
           trap 'rm -rf "$tmp"' exit
           mkdir "$tmp"/{root,home}
-          cd "$tmp/root"
+          pushd "$tmp/root"
 
-          ${lib.optionalString (gitRepo != null)
-            (if builtins.pathExists (gitRepo + "/.git") then ''
+          ${lib.optionalString (src != null)
+            (if builtins.pathExists (src + "/.git") then ''
               # Copies all git-tracked files (including uncommitted changes and submodules)
               # Why not `git archive $(git stash create)`? Because that doesn't include submodules
               # Why not `git worktree create`? Because that doesn't include uncommitted changes
               # Why --ignore-failed-read? Because `git ls-files` includes deleted files
-              git -C ${es (toString gitRepo)} ls-files -z \
-                | tar -C ${es (toString gitRepo)} --ignore-failed-read -cz --null -T - \
+              git -C ${es (toString src)} ls-files -z \
+                | tar -C ${es (toString src)} --ignore-failed-read -cz --null -T - \
                 | tar -xzf -
             '' else ''
-              cp -rT ${es (toString gitRepo)} .
+              cp -rT ${es (toString src)} .
             '')
           }
+
+          # flakes are copied to the nix store first and the files are therefore RO
+          chmod -R +w .
 
           # Ensures that clojure creates all the caches in our empty separate home directory
           export JAVA_TOOL_OPTIONS="-Duser.home=$tmp/home"
 
           ${command}
 
+           popd
+
           ${standaloneLocker}/bin/standalone-clojure-nix-locker "$tmp/home" > ${es (toString lockfile)}
         '';
       };
       homeDirectory = import ./createHome.nix {
-        inherit pkgs lockfile mavenRepos;
+        inherit pkgs src lockfile mavenRepos;
       };
       shellEnv = pkgs.writeTextFile {
         name = "clojure-nix-locker.shell-env";
