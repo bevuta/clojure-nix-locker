@@ -16,7 +16,7 @@ args = parser.parse_args()
 
 result = {'maven': {}, 'git': {}}
 
-mavenDir = args.home.joinpath('.m2', 'repository')
+mavenDir = args.home.joinpath('.m2', 'repository').resolve()
 
 if mavenDir.exists():
     for f in mavenDir.rglob('*'):
@@ -27,7 +27,7 @@ if mavenDir.exists():
         sha256_hash = sha256(f.read_bytes()).hexdigest()
         result['maven'][file] = sha256_hash
 
-gitlibsDir = args.home.joinpath('.gitlibs')
+gitlibsDir = args.home.joinpath('.gitlibs').resolve()
 
 if gitlibsDir.exists():
     for namespace_path in gitlibsDir.joinpath('libs').iterdir():
