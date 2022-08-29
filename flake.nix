@@ -24,12 +24,12 @@
         , # the command to produce the dependencies
           command
         }:
-        let lockfile = ((import ./default.nix { inherit pkgs; }).lockfile { inherit src lockfile mavenRepos; });
+        let locked = ((import ./default.nix { inherit pkgs; }).lockfile { inherit src lockfile mavenRepos; });
         in
         {
-          locker = lockfile.commandLocker command;
-          homeDirectory = lockfile.homeDirectory;
-          shellEnv = lockfile.shellEnv;
+          locker = locked.commandLocker command;
+          homeDirectory = locked.homeDirectory;
+          shellEnv = locked.shellEnv;
         };
     };
 
