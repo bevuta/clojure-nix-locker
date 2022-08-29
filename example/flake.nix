@@ -3,7 +3,7 @@
 
   inputs = {
     nixpkgs.url = "nixpkgs";
-    cloure-nix-locker.url = "github:bevuta/clojure-nix-locker";
+    clojure-nix-locker.url = "github:bevuta/clojure-nix-locker";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
