@@ -29,6 +29,14 @@ if mavenDir.exists():
 
 gitlibsDir = args.home.joinpath('.gitlibs').resolve()
 
+extractPrepLibInfo = '''
+  (some-> *input*
+          :deps/prep-lib
+          (select-keys [:alias :fn])
+          cheshire.core/generate-string
+          println)
+'''
+
 if gitlibsDir.exists():
     for namespace_path in gitlibsDir.joinpath('libs').iterdir():
         for name_path in namespace_path.iterdir():
@@ -36,7 +44,8 @@ if gitlibsDir.exists():
                 path = rev_path.relative_to(gitlibsDir, "libs").as_posix()
                 repo = Repo(rev_path)
                 prefetch = subprocess.run(["nix-prefetch-git", rev_path], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, check=True)
-
+                with open(rev_path / "deps.edn") as deps_edn:
+                    prep = subprocess.run(["bb", "-I", "--stream", extractPrepLibInfo], stdin=deps_edn, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, check=True)
                 result['git'][path] = {
                     # This is the path to the corresponding bare repository in ~/.gitlibs/_repos
                     "common_dir": Path(repo.common_dir).resolve().relative_to(gitlibsDir, "_repos").as_posix(),
@@ -44,5 +53,7 @@ if gitlibsDir.exists():
                     "rev": repo.head.commit.hexsha,
                     "sha256": json.loads(prefetch.stdout)['sha256'],
                 }
+                if preps := prep.stdout:
+                    result['git'][path]['prep'] = json.loads(preps)
 
 print(json.dumps(result, indent=2, sort_keys=True))
