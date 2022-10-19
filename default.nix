@@ -75,5 +75,6 @@ in {
       };
       shellEnv = utils.shellEnv homeDirectory;
       wrapClojure = utils.wrapClojure homeDirectory;
+      wrapPrograms = utils.wrapPrograms homeDirectory;
     };
 }
