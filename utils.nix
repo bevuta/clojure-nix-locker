@@ -14,12 +14,18 @@ rec {
           '';
     };
   };
-  wrapClojure = homeDirectory: clojure:
-    (pkgs.runCommandNoCC "locked-clojure" { buildInputs = [ pkgs.makeWrapper ]; } ''
+  wrapPrograms = homeDirectory: name: paths:
+    let script = pkgs.lib.concatMapStrings (path: ''
+        makeWrapper "${path}" "$out/bin/$(basename "${path}")" \
+          --run "source ${shellEnv homeDirectory}"
+      '')
+      paths;
+    in
+      pkgs.runCommandNoCC name { buildInputs = [ pkgs.makeWrapper ]; } ''
           mkdir -p $out/bin
-          makeWrapper ${clojure}/bin/clojure $out/bin/clojure \
-            --run "source ${shellEnv homeDirectory}"
-          makeWrapper ${clojure}/bin/clj $out/bin/clj \
-            --run "source ${shellEnv homeDirectory}"
-        '');
+          ${script}
+        '';
+  wrapClojure = homeDirectory: clojure:
+    wrapPrograms homeDirectory "locked-clojure" ["${clojure}/bin/clojure"
+                                                 "${clojure}/bin/clj"];
 }
