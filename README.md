@@ -1,9 +1,12 @@
 # clojure-nix-locker
+
 Simple and flexible tool to build clojure projects with Nix.
 
 ## Usage
 
 The [example/](example) directory has a small clojure program and the nix code required to build it.
+
+### Stable non-flake way
 
 To generate/update the lockfile:
 ```sh
@@ -14,6 +17,16 @@ To build:
 ```sh
 nix-build -A uberjar
 ```
+
+### With flakes
+
+You can generate a flake example with:
+
+```sh
+mkdir play-with-clojure-nix-locker && cd play-with-clojure-nix-locker && nix flake init -t github:bevuta/clojure-nix-locker
+```
+
+The [example README](example/README.md) has some next steps.
 
 ## Why another tool?
 
@@ -35,6 +48,7 @@ This approach results in a pretty simple implementation and loose coupling to th
 As a consequence, things like aliases "just work" without requiring `clojure-nix-locker` to know about them.
 
 Of course, this has its downsides too:
+
 - If the directory layout of these caches changes, this tool breaks.
 - Whatever classpath(s) your clojure tools compute at build-time will only work for the duration of that build.
 
