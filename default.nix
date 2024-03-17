@@ -61,6 +61,9 @@ in {
           chmod -R +w .
 
           # Ensures that clojure creates all the caches in our empty separate home directory
+          # We cannot use CLJ_JVM_OPTS here, because we want to override where `clojure`
+          # resolves _itself_ from as well as the classpath that it builds
+          # https://clojure.org/reference/clojure_cli#env_vars
           export JAVA_TOOL_OPTIONS="-Duser.home=$tmp/home"
 
           ${command}
