@@ -2,7 +2,7 @@
 # (for maven dependencies) and ~/.gitlibs (for git dependencies) according
 # to a lockfile generated with ./locker.py
 
-{ pkgs, src, mavenRepos, lockfile }:
+{ pkgs, src, mavenRepos, lockfile, extraPrepInputs }:
 let
   lib = pkgs.lib;
   # Fall back to no dependencies if the lockfile hasn't been generated yet
@@ -87,7 +87,7 @@ let
     if spec ? prep then
       let prep = spec.prep; in
       pkgs.runCommand "${name}-prepped"
-        { nativeBuildInputs = [ (utils.wrapClojure unpreppedHome pkgs.clojure) ]; }
+        { nativeBuildInputs = [ (utils.wrapClojure unpreppedHome pkgs.clojure) ] ++ extraPrepInputs; }
         ''
           cp -r ${path} $out
           chmod -R +w $out
