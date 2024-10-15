@@ -92,7 +92,7 @@ let
           cp -r ${path} $out
           chmod -R +w $out
           cd $out
-          clojure -X:${prep.alias} ${prep.fn}
+          clojure -J-Dclojure.main.report=stderr -X:${prep.alias} ${prep.fn}
         ''
     else
       path;
