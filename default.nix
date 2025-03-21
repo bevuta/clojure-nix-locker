@@ -26,6 +26,8 @@ in {
         "https://repo1.maven.org/maven2/"
         "https://repo.clojars.org/"
       ]
+    , # Extra inputs for the dependency "prep" phase
+      extraPrepInputs ? [ ]
     }: rec {
       commandLocker = command: pkgs.writeShellApplication {
         name = "clojure-nix-locker";
@@ -71,7 +73,7 @@ in {
         '';
       };
       homeDirectory = import ./createHome.nix {
-        inherit pkgs src lockfile mavenRepos;
+        inherit pkgs src lockfile mavenRepos extraPrepInputs;
       };
       shellEnv = utils.shellEnv homeDirectory;
       wrapClojure = utils.wrapClojure homeDirectory;
