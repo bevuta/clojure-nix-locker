@@ -41,14 +41,14 @@ if gitlibsDir.exists():
     for namespace_path in gitlibsDir.joinpath('libs').iterdir():
         for name_path in namespace_path.iterdir():
             for rev_path in name_path.iterdir():
-                path = rev_path.relative_to(gitlibsDir, "libs").as_posix()
+                path = rev_path.relative_to(gitlibsDir.joinpath("libs")).as_posix()
                 repo = Repo(rev_path)
                 prefetch = subprocess.run(["nix-prefetch-git", rev_path], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, check=True)
                 with open(rev_path / "deps.edn") as deps_edn:
                     prep = subprocess.run(["bb", "-I", "--stream", extractPrepLibInfo], stdin=deps_edn, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, check=True)
                 result['git'][path] = {
                     # This is the path to the corresponding bare repository in ~/.gitlibs/_repos
-                    "common_dir": Path(repo.common_dir).resolve().relative_to(gitlibsDir, "_repos").as_posix(),
+                    "common_dir": Path(repo.common_dir).resolve().relative_to(gitlibsDir.joinpath("_repos")).as_posix(),
                     "url": repo.remotes.origin.url,
                     "rev": repo.head.commit.hexsha,
                     "sha256": json.loads(prefetch.stdout)['sha256'],
