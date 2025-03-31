@@ -5,8 +5,10 @@ let
 
   standaloneLocker = pkgs.writers.writePython3Bin "standalone-clojure-nix-locker" {
     libraries = [ pkgs.python3Packages.GitPython ];
-    # We don't care about lines being too long
-    flakeIgnore = [ "E501" ];
+    flakeIgnore = [
+      "E501" # We don't care about lines being too long
+      "W504" # Allow line breaks after binary operators for multi-line conditionals
+    ];
   } ./locker.py;
 
   utils = import ./utils.nix { inherit pkgs; };
