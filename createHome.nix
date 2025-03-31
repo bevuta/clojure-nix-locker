@@ -13,12 +13,14 @@ let
     then lib.importJSON (src + "/${lockfile}")
     else { maven = {}; git = {}; };
 
-  fetchMaven = file: sha256: {
-    name = file;
+  fetchMaven = file: dep: {
+    name = if dep ? name
+           then "${builtins.dirOf file}/${dep.name}"
+           else file;
     path = pkgs.fetchurl {
       # Try to fetch this maven dependency from all given maven repositories
       urls = map (repo: repo + file) mavenRepos;
-      inherit sha256;
+      inherit (dep) sha256;
     };
   };
 

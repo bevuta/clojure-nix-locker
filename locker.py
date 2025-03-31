@@ -4,6 +4,7 @@ from hashlib import sha256
 from git import Repo
 import subprocess
 import argparse
+import re
 
 parser = argparse.ArgumentParser(
     description='Locks clojure maven and git dependencies')
@@ -20,12 +21,28 @@ mavenDir = args.home.joinpath('.m2', 'repository').resolve()
 
 if mavenDir.exists():
     for f in mavenDir.rglob('*'):
-        if f.is_dir() or f.suffix != ".jar" and f.suffix != ".pom":
+        mvn_meta_file = None
+        if (f.is_dir() or
+            (f.suffix != ".jar" and
+             f.suffix != ".pom" and
+             # Needed for dependencies with version ranges (see e.g. https://github.com/fzakaria/mvn2nix/issues/26)
+             not (mvn_meta_file := re.fullmatch("maven-metadata-(.+)\\.xml", f.name)))):
             continue
-        file = f.relative_to(mavenDir).as_posix()
+        file = f.relative_to(mavenDir)
+
         # We could use `nix-hash` here, but that's much slower and doesn't have any benefits
         sha256_hash = sha256(f.read_bytes()).hexdigest()
-        result['maven'][file] = sha256_hash
+        dep = {
+            'sha256': sha256_hash
+        }
+
+        if mvn_meta_file:
+            # Special case: In the local Maven repository, the file is suffixed with the respective
+            # remote repo name but on the server, it's not.
+            dep['name'] = file.name
+            file = file.with_name("maven-metadata.xml")
+
+        result['maven'][file.as_posix()] = dep
 
 gitlibsDir = args.home.joinpath('.gitlibs').resolve()
 
