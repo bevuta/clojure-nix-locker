@@ -34,6 +34,7 @@
           ];
 
           buildPhase = ''
+            # Overrides $HOME as well. Great for building, not great for devShells
             source ${my-clojure-nix-locker.shellEnv}
 
             # Now compile as in https://clojure.org/guides/tools_build#_compiled_uberjar_application_build
@@ -58,30 +59,42 @@
             # Trace all Bash executions
             set -o xtrace
 
-            source ${my-clojure-nix-locker.shellEnv}
-
             echo "Current locked classpath:"
-            ${pkgs.clojure}/bin/clojure -Spath
+
+            # This will work, but, $HOME will be read-only which is probably not what you want in a devShell
+            #source ${my-clojure-nix-locker.shellEnv}
+            #${pkgs.clojure}/bin/clojure -Spath
+
+            # Using the provided lockedClojure will do what you want
+            # And if pkgs.clojure is referenced anywhere, it may override it
+            ${my-clojure-nix-locker.lockedClojure}/bin/clojure -Spath
 
             set +o xtrace
 
             echo
-            echo "Note that \$HOME is overridden and read-only: $HOME"
+            echo "Note that \$HOME will be overriden if you sourced my-clojure-nix-locker.shellEnv: $HOME"
+            echo "If you used my-clojure-nix-locker.lockedClojure, it will be left alone and only the clojure and clj commands are overridden and locked"
+            echo
+            echo "This command should be locked in this shell:"
+            echo "clojure -Spath"
             echo
           '';
           inputsFrom = [
-            packages.uberjar
+            # Will pull in pkgs.clojure, and we want my-clojure-nix-locker.lockedClojure
+            #packages.uberjar
           ];
           buildInputs = with pkgs; [
             openjdk
             cacert # for maven and tools.gitlibs
-            clojure
             clj-kondo
             coreutils
             # This provides the standalone `clojure-nix-locker` script in the shell
             # You can use it, or `nix run .#locker`
             # Both does the same
             my-clojure-nix-locker.locker
+            # Use the locked clojure
+            # A pkgs.clojure reference could override it
+            my-clojure-nix-locker.lockedClojure
           ];
         };
       });

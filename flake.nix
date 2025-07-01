@@ -30,6 +30,13 @@
           locker = locked.commandLocker command;
           homeDirectory = locked.homeDirectory;
           shellEnv = locked.shellEnv;
+          # Function to wrap your own overridden pkgs.clojure into a locked environment, a special case
+          wrapClojure = locked.wrapClojure;
+          # Provide an already locked clojure
+          # You want to ensure that pkgs.clojure are not reference anywhere else
+          lockedClojure = locked.wrapClojure pkgs.clojure;
+          # Function to wrap other Java classpath aware programs with the locked environment
+          wrapPrograms = locked.wrapPrograms;
         };
     };
 
