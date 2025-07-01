@@ -302,6 +302,21 @@
     "org/apache/maven/shared/maven-shared-utils/3.3.4/maven-shared-utils-3.3.4.pom": {
       "sha256": "bf83482d96f76d63699d63e125e64f4ac73c8178985733662dbd69af9c60339e"
     },
+    "org/bouncycastle/bcprov-jdk18on/1.81/bcprov-jdk18on-1.81.jar": {
+      "sha256": "249f396412b0c0ce67f25c8197da757b241b8be3ec4199386c00704a2457459b"
+    },
+    "org/bouncycastle/bcprov-jdk18on/1.81/bcprov-jdk18on-1.81.pom": {
+      "sha256": "203990122be0fdd34bf12d0b788c0655161386a8e858ba43f06e3709c2cc74cc"
+    },
+    "org/bouncycastle/bcprov-jdk18on/maven-metadata-central.xml": {
+      "content": "<?xml version='1.0' encoding='utf-8'?><metadata><groupId>org.bouncycastle</groupId><artifactId>bcprov-jdk18on</artifactId><versioning><versions><version>1.81</version></versions></versioning></metadata>"
+    },
+    "org/bouncycastle/bcutil-jdk18on/1.81/bcutil-jdk18on-1.81.jar": {
+      "sha256": "31a5fe3a7ba42e3457b83930f0ff8d679fb5b76eaadf2b51f5740c92a394bf52"
+    },
+    "org/bouncycastle/bcutil-jdk18on/1.81/bcutil-jdk18on-1.81.pom": {
+      "sha256": "6543ee9dd6c554e6fdbefc39cc74f4258f452d10b253a5d6cd78548bf9492dd4"
+    },
     "org/checkerframework/checker-compat-qual/2.5.5/checker-compat-qual-2.5.5.jar": {
       "sha256": "11d134b245e9cacc474514d2d66b5b8618f8039a1465cdc55bbc0b34e0008b7a"
     },

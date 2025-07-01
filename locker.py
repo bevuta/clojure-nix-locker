@@ -5,6 +5,7 @@ from git import Repo
 import subprocess
 import argparse
 import re
+import xml.etree.ElementTree as ET
 
 parser = argparse.ArgumentParser(
     description='Locks clojure maven and git dependencies')
@@ -19,6 +20,25 @@ result = {'maven': {}, 'git': {}}
 
 mavenDir = args.home.joinpath('.m2', 'repository').resolve()
 
+
+def stabilize_maven_metadata(orig_file):
+    """Accepts a path of a maven-metadata.xml file and transforms its content so that it's stable
+    across multiple runs (i.e. server-side changes in the file due to e.g. new releases don't affect
+    it) but still sufficient to satisfy version range dependencies within the locked
+    repository. Returns the stabilized content as a string."""
+    orig = ET.parse(orig_file)
+    stable = ET.Element("metadata")
+    stable.append(orig.find("./groupId"))
+    stable.append(orig.find("./artifactId"))
+    versioning = ET.SubElement(stable, "versioning")
+    versions = ET.SubElement(versioning, "versions")
+    for version_dir in f.parent.iterdir():
+        if version_dir.is_dir():
+            ET.SubElement(versions, "version").text = version_dir.name
+    stable_str = ET.tostring(stable, encoding='utf-8', xml_declaration=True).decode('utf-8')
+    return re.sub(r'>\s+<', '><', stable_str).strip()
+
+
 if mavenDir.exists():
     for f in mavenDir.rglob('*'):
         mvn_meta_file = None
@@ -29,19 +49,12 @@ if mavenDir.exists():
              not (mvn_meta_file := re.fullmatch("maven-metadata-(.+)\\.xml", f.name)))):
             continue
         file = f.relative_to(mavenDir)
-
-        # We could use `nix-hash` here, but that's much slower and doesn't have any benefits
-        sha256_hash = sha256(f.read_bytes()).hexdigest()
-        dep = {
-            'sha256': sha256_hash
-        }
-
+        dep = {}
         if mvn_meta_file:
-            # Special case: In the local Maven repository, the file is suffixed with the respective
-            # remote repo name but on the server, it's not.
-            dep['name'] = file.name
-            file = file.with_name("maven-metadata.xml")
-
+            dep['content'] = stabilize_maven_metadata(f)
+        else:
+            # We could use `nix-hash` here, but that's much slower and doesn't have any benefits
+            dep['sha256'] = sha256(f.read_bytes()).hexdigest()
         result['maven'][file.as_posix()] = dep
 
 gitlibsDir = args.home.joinpath('.gitlibs').resolve()
