@@ -14,14 +14,14 @@ let
     else { maven = {}; git = {}; };
 
   fetchMaven = file: dep: {
-    name = if dep ? name
-           then "${builtins.dirOf file}/${dep.name}"
-           else file;
-    path = pkgs.fetchurl {
-      # Try to fetch this maven dependency from all given maven repositories
-      urls = map (repo: repo + file) mavenRepos;
-      inherit (dep) sha256;
-    };
+    name = file;
+    path = if dep ? content
+           then pkgs.writeText (builtins.baseNameOf file) dep.content
+           else pkgs.fetchurl {
+             # Try to fetch this maven dependency from all given maven repositories
+             urls = map (repo: repo + file) mavenRepos;
+             inherit (dep) sha256;
+           };
   };
 
   handleGit = path: { url, rev, sha256, common_dir, ... }: {

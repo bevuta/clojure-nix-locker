@@ -1,6 +1,8 @@
 ; adapted from https://clojure.org/guides/tools_build#_setup
 {:paths ["src"] ;; project paths
- :deps {org.clojure/data.csv {:mvn/version "1.0.0"}} ;; project deps
+ :deps {org.clojure/data.csv {:mvn/version "1.0.0"}
+        ;; Requires maven-metadata.xml for its bcprov-jdk18on dependency
+        org.bouncycastle/bcutil-jdk18on {:mvn/version "1.81"}}
 
  :aliases
  {;; Run with clj -T:build function-in-build
