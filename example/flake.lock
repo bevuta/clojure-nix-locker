@@ -10,11 +10,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1743432905,
-        "narHash": "sha256-OxreQ5mm1cbFx9jrMafAQppr9MM3JxGJYUadj5wCdv0=",
+        "lastModified": 1751366240,
+        "narHash": "sha256-Gqk/f8775U0gpJa8Fb1RGW1WtylKFnXJxnVScZF9pWQ=",
         "owner": "bevuta",
         "repo": "clojure-nix-locker",
-        "rev": "a4cf9216979fb92087c480fd560d590da0e5e499",
+        "rev": "c99db6452027c3704fe640449b05c31e69039e88",
         "type": "github"
       },
       "original": {
