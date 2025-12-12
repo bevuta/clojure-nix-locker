@@ -21,7 +21,7 @@ rec {
       '')
       paths;
     in
-      pkgs.runCommandNoCC name { buildInputs = [ pkgs.makeWrapper ]; } ''
+      pkgs.runCommand name { buildInputs = [ pkgs.makeWrapper ]; } ''
           mkdir -p $out/bin
           ${script}
         '';

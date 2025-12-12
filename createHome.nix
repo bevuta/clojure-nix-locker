@@ -40,7 +40,7 @@ let
   gitWorktreeCache = gitWorkTrees: pkgs.linkFarm "git-worktree-cache" gitWorkTrees;
 
   # This corresponds to the ~/.gitlibs/_repos directory, containing git directories for the above worktrees
-  gitFakeRepoCache = pkgs.runCommandNoCC "git-fake-repo-cache" {}
+  gitFakeRepoCache = pkgs.runCommand "git-fake-repo-cache" {}
     # We don't actually need these, however clojure has a check for the existence of a
     # `config` file in these directories, so let's create empty ones
 
@@ -54,7 +54,7 @@ let
     "mkdir -p $out");
 
   # Provides a ~/.clojure directory which clojure will accept read-only
-  configDir = pkgs.runCommandNoCC "config-dir" {} ''
+  configDir = pkgs.runCommand "config-dir" {} ''
     mkdir -p $out/tools
     echo '{}' > $out/deps.edn
     echo '{}' > $out/tools/tools.edn
