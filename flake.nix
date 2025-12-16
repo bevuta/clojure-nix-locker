@@ -1,7 +1,7 @@
 {
   description = "Build clojure projects with nix by creating a lockfile for maven and git dependencies";
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs";
+    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-25.11";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
