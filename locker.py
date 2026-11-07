@@ -23,7 +23,7 @@ mavenDir = args.home.joinpath('.m2', 'repository').resolve()
 
 def stabilize_maven_metadata(orig_file):
     """Accepts a path of a maven-metadata.xml file and transforms its content so that it's stable
-    across multiple runs (i.e. server-side changes in the file due to e.g. new releases don't affect
+    across multiple runs with the same versions (i.e. timestamps and ordering don't affect
     it) but still sufficient to satisfy version range dependencies within the locked
     repository. Returns the stabilized content as a string."""
     orig = ET.parse(orig_file)
@@ -32,9 +32,8 @@ def stabilize_maven_metadata(orig_file):
     stable.append(orig.find("./artifactId"))
     versioning = ET.SubElement(stable, "versioning")
     versions = ET.SubElement(versioning, "versions")
-    for version_dir in f.parent.iterdir():
-        if version_dir.is_dir():
-            ET.SubElement(versions, "version").text = version_dir.name
+    for version in sorted({v.text for v in orig.findall("./versioning/versions/version")}):
+        ET.SubElement(versions, "version").text = version
     stable_str = ET.tostring(stable, encoding='utf-8', xml_declaration=True).decode('utf-8')
     return re.sub(r'>\s+<', '><', stable_str).strip()
 

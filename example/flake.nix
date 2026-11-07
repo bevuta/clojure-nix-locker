@@ -66,7 +66,7 @@
             set +o xtrace
 
             echo
-            echo "Note that \$HOME is overridden and read-only: $HOME"
+            echo "Locked HOME: $HOME"
             echo
           '';
           inputsFrom = [

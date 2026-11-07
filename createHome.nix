@@ -31,6 +31,34 @@ let
     };
   };
 
+  # Mirror Maven repositories to immutable metadata-only snapshots. Writable
+  # local state must not let non-sandboxed wrappers fetch anything outside the lock.
+  emptyRepo = pkgs.runCommand "empty-maven-repository" {} "mkdir -p $out";
+  metadata = lib.filterAttrs (file: dep:
+    dep ? content && builtins.match ".*/maven-metadata-(.+)\\.xml" file != null
+  ) contents.maven;
+  repositoryId = file: builtins.head (builtins.match ".*/maven-metadata-(.+)\\.xml" file);
+  repositoryIds = lib.unique (map repositoryId (builtins.attrNames metadata));
+  mirrorId = id: "clojure-nix-locker-${id}";
+  escapeXML = builtins.replaceStrings [ "&" "<" ">" "\"" "'" ] [ "&amp;" "&lt;" "&gt;" "&quot;" "&apos;" ];
+  metadataRepo = id: pkgs.linkFarm "locked-maven-metadata" (lib.concatLists (lib.mapAttrsToList (file: dep:
+    let name = "${builtins.dirOf file}/maven-metadata.xml";
+    in [
+      (fetchMaven name dep)
+      { name = "${name}.sha1"; path = pkgs.writeText "metadata.sha1" (builtins.hashString "sha1" dep.content); }
+    ]
+  ) (lib.filterAttrs (file: _: repositoryId file == id) metadata)));
+  mirror = id: mirrored: repo: ''
+    <mirror><id>${escapeXML id}</id><mirrorOf>${escapeXML mirrored}</mirrorOf>
+      <url>file://${repo}/</url></mirror>
+  '';
+  settings = pkgs.writeText "locked-maven-settings.xml" ''
+    <settings><mirrors>
+      ${lib.concatMapStrings (id: mirror (mirrorId id) id (metadataRepo id)) repositoryIds}
+      ${mirror "clojure-nix-locker-missing" "*" emptyRepo}
+    </mirrors></settings>
+  '';
+
   # Corresponds to the ~/.m2/repository directory
   mavenRepoCache = pkgs.linkFarm "maven-repo-cache" (lib.mapAttrsToList fetchMaven contents.maven);
 
@@ -66,6 +94,10 @@ let
       {
         name = ".m2/repository";
         path = mavenRepoCache;
+      }
+      {
+        name = ".m2/settings.xml";
+        path = settings;
       }
       {
         name = ".gitlibs/libs";

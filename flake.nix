@@ -54,6 +54,7 @@
         inherit (pkgs) standaloneLocker;
         default = standaloneLocker;
       };
+      checks = import ./tests { inherit pkgs; };
     }
   );
 }
